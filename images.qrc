@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/mypic">
+        <file>images/mFs.ico</file>
+        <file>images/2.png</file>
+        <file>images/2_1.png</file>
+        <file>images/0123_3.png</file>
+        <file>images/0123_4.png</file>
+    </qresource>
+</RCC>
