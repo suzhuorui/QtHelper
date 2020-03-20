@@ -64,6 +64,7 @@ private:
 
     QStringList findSerialPort();
     void initSerialPort();
+
 public slots:
     void changeDeviceInfo(const QModelIndex &index);
     void createTreesun();
@@ -83,7 +84,6 @@ public slots:
     void HexEditSLOT();
     void clearDataSLOT();
     void saveDataSLOT();
-
 };
 
 #endif // MAINWINDOW_H

@@ -18,7 +18,6 @@ public:
     virtual void sendHexMsg(QString msg,QString addr="");
     virtual void timerSend(QString msg, float s, int count, int sendType,QString add="");
 
-    bool isOpen=false;
     int strBaudRate;
     int strDataBits;
     int strParity;
@@ -39,7 +38,7 @@ private:
 
 
 signals:
-    emit void ricvBitSIGNAL(int,int,int,int);
+    void ricvBitSIGNAL(int,int,int,int);
 
 public slots:
     void ReadyreadSLOT();

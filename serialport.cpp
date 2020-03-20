@@ -13,7 +13,7 @@ bool SerialPort::openSerialPort(int strBaudRate,int strDataBits,int strParity,in
 {
     getSetting(strBaudRate,strDataBits,strParity,strStopBits);
     m_serial->setPortName(name);
-    isOpen=m_serial->open(QIODevice::ReadWrite);
+    bool isOpen=m_serial->open(QIODevice::ReadWrite);
     if(isOpen)
     {
         m_serial->setBaudRate(baudRate);//9600
@@ -29,26 +29,28 @@ bool SerialPort::openSerialPort(int strBaudRate,int strDataBits,int strParity,in
 
 bool SerialPort::getState()
 {
-    return isOpen;
+    return m_serial->isOpen();
 }
 
 void SerialPort::closeSerialPort()
 {
     m_serial->close();
-    isOpen=false;
 }
 
 void SerialPort::sendMsg(QString msg,QString addr)
 {
-
     QByteArray ba=msg.toLocal8Bit();
     int len=m_serial->write(ba);
     if(len>0)
     {
+        qDebug()<<"进入发送"<<getState();
         sendBit+=len;
-        QString str="["+common::getCurrTime()+"]发送："+msg;
+        QString str="["+common::getCurrTime()+"]发送[ASCII]："+msg;
+        qDebug()<<"进入发送"<<getState();
         textBrowser->append(str);
+        qDebug()<<"进入发送"<<getState();
         emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
+        qDebug()<<"进入发送"<<getState();
     }
 }
 
@@ -59,7 +61,7 @@ void SerialPort::sendHexMsg(QString msg,QString addr)
     if(len>0)
     {
         sendBit+=len;
-        QString str="["+common::getCurrTime()+"]自己发送："+msg;
+        QString str="["+common::getCurrTime()+"]发送[Hex]："+msg;
         textBrowser->append(str);
         emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
     }

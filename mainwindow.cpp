@@ -743,7 +743,7 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
             port->textBrowser->hide();
         }
         ui->label_Device_name->setText(currName);
-        if(serialPortList.at(index.row())->isOpen)
+        if(serialPortList.at(index.row())->getState())
         {
             ui->pushButton_open_close->setText("关闭串口");
             ui->label_Device_State->setText("就绪");
@@ -958,10 +958,13 @@ void MainWindow::open_or_close()
                 tcpClientList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(ui->groupBox_read);
                 tcpClientList.at(ui->treeView->currentIndex().row())->textBrowser->show();
             }
+            else {
+                QMessageBox::warning(this,"错误","连接服务器失败，请检查服务器IP地址与端口",nullptr,nullptr);
+            }
         }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="串口(自动检测，无需创建)") {
-        if(!serialPortList.at(ui->treeView->currentIndex().row())->isOpen)
+        if(!serialPortList.at(ui->treeView->currentIndex().row())->getState())
         {
             if(serialPortList.at(ui->treeView->currentIndex().row())->openSerialPort(
                         ui->comboBox_botelv->currentIndex(),ui->comboBox_dateBit->currentIndex(),
@@ -973,6 +976,9 @@ void MainWindow::open_or_close()
                 serialPortList.at(ui->treeView->currentIndex().row())->textEdit->show();
                 serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(ui->groupBox_read);
                 serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->show();
+            }
+            else {
+                QMessageBox::warning(this,"错误","打开串口失败，确保串口存在，或请重启软件",nullptr,nullptr);
             }
         }
         else {
@@ -986,19 +992,19 @@ void MainWindow::open_or_close()
         if(!tcpServerManagementList.at(ui->treeView->currentIndex().row())->isListening())
         {
             qDebug()<<"点击监听";
-            bool is=tcpServerManagementList.at(ui->treeView->currentIndex().row())->CreateAndlistenTcp();
-            if(!is)
+            if(tcpServerManagementList.at(ui->treeView->currentIndex().row())->CreateAndlistenTcp())
             {
-                qDebug()<<"监听失败";
-                return;
+                ui->comboBox_TCPclients->addItem("全部客户端");
+                ui->pushButton_open_close->setText("停止监听");
+                ui->label_Device_State->setText("就绪");
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(ui->groupBox_send);
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->show();
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->setParent(ui->groupBox_read);
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->show();
             }
-            ui->comboBox_TCPclients->addItem("全部客户端");
-            ui->pushButton_open_close->setText("停止监听");
-            ui->label_Device_State->setText("就绪");
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(ui->groupBox_send);
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->show();
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->setParent(ui->groupBox_read);
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->show();
+            else {
+                QMessageBox::warning(this,"错误","监听失败，请确保端口正确且没有被占用",nullptr,nullptr);
+            }
         }
         else
         {
@@ -1384,6 +1390,7 @@ void MainWindow::Retimer()
 //更新设备信息(字节数和定时按钮)
 void MainWindow::upDateDeviceInfo(int send, int ricv, int falgcount, int type)
 {
+    qDebug()<<"SLOT";
     switch (type) {
     case 1:
         if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
@@ -1446,14 +1453,15 @@ void MainWindow::upDateDeviceInfo(int send, int ricv, int falgcount, int type)
         }
         break;
     case 5:
+        qDebug()<<"SLOT";
         if(ui->treeView->currentIndex().parent().data().toString()=="串口(自动检测，无需创建)")
         {
-            if(udpClientList.at(ui->treeView->currentIndex().row())->getflagcount()==falgcount)
+            if(serialPortList.at(ui->treeView->currentIndex().row())->getflagcount()==falgcount)
             {
                 ui->label_sendNum->setText(QString::number(send)+" 字节");
                 ui->label_ricvNum->setText(QString::number(ricv)+" 字节");
                 qDebug()<<"upDateBit"<<send<<ricv;
-                if(udpClientList.at(ui->treeView->currentIndex().row())->isTimerSending()==true)
+                if(serialPortList.at(ui->treeView->currentIndex().row())->isTimerSending()==true)
                     ui->toolButton_timerStartstop->setText("停止发送");
                 else
                     ui->toolButton_timerStartstop->setText("定时发送");
