@@ -84,6 +84,8 @@ public slots:
     void HexEditSLOT();
     void clearDataSLOT();
     void saveDataSLOT();
+    void clearSendSLOT();
+    void loadFileSLOT();
 };
 
 #endif // MAINWINDOW_H

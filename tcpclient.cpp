@@ -43,35 +43,69 @@ void tcpClient::disConnectToHost()
 
 void tcpClient::sendMsg(QString str, QString addr)
 {
-    QByteArray ba=str.toLocal8Bit();
-    if(socket->isOpen())
+    if(!socket->isOpen())
+        return;
+    data.clear();
+    if(isFile)
     {
-        int size=int(socket->write(ba,ba.size()));
-        if(size>=0)
+        QStringList strlist=textEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        qDebug()<<strlist.length()<<strlist2.at(0);
+
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
         {
-            sendBit+=size;
-            QString str1="["+common::getCurrTime()+"]发送[ASCII]："+str;
-            textBrowser->append(str1);
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
         }
-        emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
+        data=file.readAll();
     }
+    else {
+        data=str.toLocal8Bit();
+    }
+
+    int size=int(socket->write(data,data.size()));
+    if(size>=0)
+    {
+        sendBit+=size;
+        QString str1="["+common::getCurrTime()+"]发送[ASCII]："+str;
+        textBrowser->append(str1);
+    }
+    emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
 }
 
 void tcpClient::sendHexMsg(QString msg,QString addr)
 {
-    QByteArray dataSend=common::hexStrToByteArray(msg);
-
-    if(socket->isOpen())
+    if(!socket->isOpen())
+        return;
+    data.clear();
+    if(isFile)
     {
-        int size=int(socket->write(dataSend,dataSend.size()));
-        if(size>=0)
+        QStringList strlist=hexEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
         {
-            sendBit+=size;
-            QString str1="["+common::getCurrTime()+"]发送[Hex]："+msg;
-            textBrowser->append(str1);
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
         }
-        emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
+        QByteArray ba=file.readAll();
+        QString strHex=data.toHex().toStdString().c_str();
+        data=common::hexStrToByteArray(strHex.toUpper());
     }
+    else {
+        data=common::hexStrToByteArray(msg);
+    }
+
+
+    int size=int(socket->write(data,data.size()));
+    if(size>=0)
+    {
+        sendBit+=size;
+        QString str1="["+common::getCurrTime()+"]发送[Hex]："+msg;
+        textBrowser->append(str1);
+    }
+    emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
 }
 
 void tcpClient::disconnectSLOT()

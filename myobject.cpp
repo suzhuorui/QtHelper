@@ -78,6 +78,36 @@ bool MyObject::isTimerSending()
     return isTimeSending;
 }
 
+void MyObject::clearSend(int type)
+{
+    if(type==10)
+    {
+        textEdit->clear();
+    }
+    else if (type==16) {
+        hexEdit->clear();
+    }
+}
+
+void MyObject::loadFile(QString path,int type)
+{
+    isFile=true;
+    qDebug()<<type<<path;
+    if(type==10)
+    {
+        textEdit->clear();
+        textEdit->append("外部数据源文件["+path+"]");
+        textEdit->setEnabled(false);
+    }
+    else if(type==16)
+    {
+        hexEdit->isFile=true;
+        hexEdit->clear();
+        hexEdit->append("外部数据源文件["+path+"]");
+        hexEdit->setEnabled(false);
+    }
+}
+
 void MyObject::findMyIP()
 {
     QString ipaddress;

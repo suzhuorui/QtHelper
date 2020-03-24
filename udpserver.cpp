@@ -14,28 +14,64 @@ udpServer::udpServer(int port, int falgcount, QObject *parent) : QObject(parent)
 
 void udpServer::sendMsg(QString msg,QString addr)
 {
-    if(!otherIP.isEmpty())
+    if(otherIP.isEmpty())
+        return;
+    data.clear();
+    if(isFile)
     {
-        QByteArray ba=msg.toLocal8Bit();
-        int len=m_socket->writeDatagram(ba,QHostAddress(otherIP),quint16(otherPort));
-        sendBit+=len;
-        QString str="["+common::getCurrTime()+"]发送[ASCII]："+msg;
-        textBrowser->append(str);
-        emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
+        QStringList strlist=textEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        qDebug()<<strlist.length()<<strlist2.at(0);
+
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
+        {
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
+        }
+        data=file.readAll();
     }
+    else {
+        data=msg.toLocal8Bit();
+    }
+
+    int len=m_socket->writeDatagram(data,QHostAddress(otherIP),quint16(otherPort));
+    sendBit+=len;
+    QString str="["+common::getCurrTime()+"]发送[ASCII]："+msg;
+    textBrowser->append(str);
+    emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
+
 }
 
 void udpServer::sendHexMsg(QString msg, QString addr)
 {
-    if(!otherIP.isEmpty())
+    if(otherIP.isEmpty())
+        return;
+
+    data.clear();
+    if(isFile)
     {
-        QByteArray ba=common::hexStrToByteArray(msg);
-        int len=m_socket->writeDatagram(ba,QHostAddress(otherIP),quint16(otherPort));
-        sendBit+=len;
-        QString str="["+common::getCurrTime()+"]发送[Hex]："+msg;
-        textBrowser->append(str);
-        emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
+        QStringList strlist=hexEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
+        {
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
+        }
+        QByteArray ba=file.readAll();
+        QString strHex=data.toHex().toStdString().c_str();
+        data=common::hexStrToByteArray(strHex.toUpper());
     }
+    else {
+        data=common::hexStrToByteArray(msg);
+    }
+
+    int len=m_socket->writeDatagram(data,QHostAddress(otherIP),quint16(otherPort));
+    sendBit+=len;
+    QString str="["+common::getCurrTime()+"]发送[Hex]："+msg;
+    textBrowser->append(str);
+    emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
 }
 
 void udpServer::ReadyreadSLOT()

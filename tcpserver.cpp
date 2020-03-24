@@ -64,16 +64,33 @@ void tcpServer::sendMsg(QString str, QString addr)
 {
     if(socketList.isEmpty())
         return ;
-    QByteArray ba=str.toLocal8Bit();
+    data.clear();
+    if(isFile)
+    {
+        QStringList strlist=textEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        qDebug()<<strlist.length()<<strlist2.at(0);
+
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
+        {
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
+        }
+        data=file.readAll();
+    }
+    else {
+        data=str.toLocal8Bit();
+    }
+
     if(addr=="全部客户端")
     {
         foreach(socketRun *sock,socketList){
-            sock->write(ba);
+            sock->write(data);
             qDebug()<<"fuSend:"<<str;
         }
         QString str1="["+common::getCurrTime()+"]发送[ASCII]："+str;
         textBrowser->append(str1);
-        emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
     }
     else {
         int n=-1;
@@ -84,30 +101,45 @@ void tcpServer::sendMsg(QString str, QString addr)
             if(address==addr)
             {
                 QString str1="["+common::getCurrTime()+"]发送[ASCII]："+str;
-                socketList.at(n)->write(ba);
+                socketList.at(n)->write(data);
                 textBrowser->append(str1);
                 break;
             }
         }
-        emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
     }
+    emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
 }
 
 void tcpServer::sendHexMsg(QString msg, QString addr)
 {
     if(socketList.isEmpty())
         return ;
-    QByteArray ba=common::hexStrToByteArray(msg);
+    data.clear();
+    if(isFile)
+    {
+        QStringList strlist=hexEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
+        {
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
+        }
+        QByteArray ba=file.readAll();
+        QString strHex=data.toHex().toStdString().c_str();
+        data=common::hexStrToByteArray(strHex.toUpper());
+    }
+    else {
+        data=common::hexStrToByteArray(msg);
+    }
+
     if(addr=="全部客户端")
     {
         qDebug()<<"服务器->全部客户端("<<socketList.length()<<"个)";
         foreach(socketRun *sock,socketList){
-            sock->write(ba);
+            sock->write(data);
             qDebug()<<"fuSend:"<<msg;
         }
-        QString str1="["+common::getCurrTime()+"]发送[Hex]:"+msg;
-        textBrowser->append(str1);
-        emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
     }
     else {
         int n=-1;
@@ -117,14 +149,14 @@ void tcpServer::sendHexMsg(QString msg, QString addr)
             n++;
             if(address==addr)
             {
-                QString str1="["+common::getCurrTime()+"]发送[Hex]:"+msg;
-                socketList.at(n)->write(ba);
-                textBrowser->append(str1);
+                socketList.at(n)->write(data);
                 break;
             }
         }
-        emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
     }
+    QString str1="["+common::getCurrTime()+"]发送[Hex]:"+msg;
+    textBrowser->append(str1);
+    emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
 }
 
 void tcpServer::RemoveClient(int index)

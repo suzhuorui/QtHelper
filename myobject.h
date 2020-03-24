@@ -35,6 +35,8 @@ public:
     int getflagcount();
     void setZero();
     bool isTimerSending();
+    void clearSend(int type);
+    void loadFile(QString path, int type);
 
 private:
     void findMyIP();
@@ -44,6 +46,7 @@ public:
     QTextBrowser *textBrowser;
     QTextEdit *textEdit;
     common *hexEdit;
+    bool isFile=false;
 
 protected:
     //设备属性
@@ -66,6 +69,8 @@ protected:
     QString msg;
     int sendType=0;
     bool isTimeSending=false;
+    QByteArray data;
+
 };
 
 #endif // MYOBJECT_H
