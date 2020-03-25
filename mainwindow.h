@@ -23,10 +23,13 @@
 #include "udpclient.h"
 #include <QRadioButton>
 #include "helpdialog.h"
+#include "settingdialog.h"
 
 namespace Ui {
 class MainWindow;
 }
+
+extern int DeviceNum;//当前连接数
 
 class MainWindow : public QMainWindow
 {
@@ -36,6 +39,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void InitSoft();
+
+
 
 private:
     Ui::MainWindow *ui;
@@ -62,8 +67,11 @@ private:
     QList<SerialPort *> serialPortList;
 
 
+    int MaxDeviceNum=10;//最大连接数
+
     QStringList findSerialPort();
     void initSerialPort();
+
 
 public slots:
     void changeDeviceInfo(const QModelIndex &index);
@@ -86,6 +94,8 @@ public slots:
     void saveDataSLOT();
     void clearSendSLOT();
     void loadFileSLOT();
+    void clickSetting();
+    void setMaxDeviceNum(int num);
 };
 
 #endif // MAINWINDOW_H

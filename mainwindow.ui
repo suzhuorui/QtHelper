@@ -866,6 +866,51 @@
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="pushButton_MaxConnectNum">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>512</y>
+      <width>132</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>更改最大连接数</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>520</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>目前设备数：</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_DeviceNum">
+    <property name="geometry">
+     <rect>
+      <x>633</x>
+      <y>520</y>
+      <width>54</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
    <zorder>label_5</zorder>
    <zorder>treeView</zorder>
    <zorder>groupBox_read</zorder>
@@ -877,6 +922,9 @@
    <zorder>label_6</zorder>
    <zorder>label_sendNum</zorder>
    <zorder>groupBox_2</zorder>
+   <zorder>pushButton_MaxConnectNum</zorder>
+   <zorder>label_7</zorder>
+   <zorder>label_DeviceNum</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

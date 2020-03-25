@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QBrush>
 #include <QGraphicsOpacityEffect>
+
+int DeviceNum=0;
 /*时间：2020.3.12
  * 基本功能：
  *      1.五种模式，tcp服务器、tcp客户端、udp服务器、udp客户端、串口。
@@ -18,6 +20,10 @@
  *      12.导入文件数据源
  *      13.保存显示区数据到文件
 */
+//点击监听后根据选择模式显示输入框TCP服务器--解决
+//TCP服务器加载文件，发送按钮名字改变--解决
+//检测加载文件、导出文件、清空数据框前是否存在
+//添加功能，限制最大连接数，更改最大连接数。选择无限制连接或者输入最大连接数。
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -113,6 +119,9 @@ void MainWindow::InitSoft()
     ui->comboBox_stopBit->addItem("1.5");
     ui->comboBox_stopBit->addItem("2");
 
+    QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+    ui->label_DeviceNum->setText(str);
+
     //初始化属性标签
     ui->label_set_readip->hide();
     ui->label_set_writeip->hide();
@@ -148,6 +157,7 @@ void MainWindow::InitSoft()
     connect(ui->pushButton_saveData,&QPushButton::clicked,this,&MainWindow::saveDataSLOT);
     connect(ui->pushButton_clearSend,&QPushButton::clicked,this,&MainWindow::clearSendSLOT);
     connect(ui->pushButton_loadFile,&QPushButton::clicked,this,&MainWindow::loadFileSLOT);
+    connect(ui->pushButton_MaxConnectNum,&QPushButton::clicked,this,&MainWindow::clickSetting);
 }
 
 //查找串口
@@ -179,7 +189,17 @@ void MainWindow::initSerialPort()
         SerialPort *newSerialPort=new SerialPort(name,serialPortList.length());
         connect(newSerialPort,&SerialPort::ricvBitSIGNAL,this,&MainWindow::upDateDeviceInfo);
         serialPortList.append(newSerialPort);
+        DeviceNum++;
+        QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+        ui->label_DeviceNum->setText(str);
     }
+}
+
+void MainWindow::setMaxDeviceNum(int num)
+{
+    MaxDeviceNum=num;
+    QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+    ui->label_DeviceNum->setText(str);
 }
 
 //选择树形结构中的设备时，更改界面右上方的设备信息
@@ -245,7 +265,7 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
 
 
             ui->pushButton_open_close->show();
-            ui->pushButton_sendDate->setText("加载文件");
+            ui->pushButton_loadFile->setText("加载文件");
             ui->label_set_readip->setText("本机IP:");
             ui->label_set_writeip->setText(tcpServerManagementList.at(index.row())->getIP());
             ui->label_set_readport->setText("监听端口:");
@@ -925,6 +945,11 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
 //创建子树
 void MainWindow::createTreesun()
 {
+    if(DeviceNum>=MaxDeviceNum)
+    {
+        QMessageBox::warning(this,"ERROR","超过最大设备数，创建失败!",nullptr,nullptr);
+        return;
+    }
     if(ui->treeView->currentIndex().data().toString()=="TCP服务器")
     {
         class CreateTcpServer2 *dialog=new class CreateTcpServer2();
@@ -960,6 +985,7 @@ void MainWindow::deleteTreesun()
         delete tcpServerManagementList.at(ui->treeView->currentIndex().row());
         tcpServerManagementList.removeAt(ui->treeView->currentIndex().row());
         m_Tree->removeRow(ui->treeView->currentIndex().row(),ui->treeView->currentIndex().parent());
+        DeviceNum--;
         //*最后在移除item，如果先移除那么当前所选中的就变了
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="TCP客户端") {
@@ -970,19 +996,24 @@ void MainWindow::deleteTreesun()
         delete tcpClientList.at(ui->treeView->currentIndex().row());
         tcpClientList.removeAt(ui->treeView->currentIndex().row());
         m_Tree->removeRow(ui->treeView->currentIndex().row(),ui->treeView->currentIndex().parent());
+        DeviceNum--;
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP服务端") {
         qDebug()<<"点击删除UDP服务器";
         delete udpServerList.at(ui->treeView->currentIndex().row());
         udpServerList.removeAt(ui->treeView->currentIndex().row());
         m_Tree->removeRow(ui->treeView->currentIndex().row(),ui->treeView->currentIndex().parent());
+        DeviceNum--;
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP客户端") {
         qDebug()<<"点击删除UDP客户端";
         delete udpClientList.at(ui->treeView->currentIndex().row());
         udpClientList.removeAt(ui->treeView->currentIndex().row());
         m_Tree->removeRow(ui->treeView->currentIndex().row(),ui->treeView->currentIndex().parent());
+        DeviceNum--;
     }
+    QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+    ui->label_DeviceNum->setText(str);
 }
 
 //打开关闭设备,UDP无需连接
@@ -1006,8 +1037,15 @@ void MainWindow::open_or_close()
                 qDebug()<<"点击客户端连接";
                 ui->pushButton_open_close->setText("断开连接");
                 ui->label_Device_State->setText("就绪");
-                tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
-                tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->show();
+                if(ui->radioButton->isChecked())
+                {
+                    tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
+                    tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->show();
+                }
+                else {
+                    tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
+                    tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+                }
                 tcpClientList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(ui->groupBox_read);
                 tcpClientList.at(ui->treeView->currentIndex().row())->textBrowser->show();
             }
@@ -1025,8 +1063,15 @@ void MainWindow::open_or_close()
             {
                 ui->pushButton_open_close->setText("关闭串口");
                 ui->label_Device_State->setText("就绪");
-                serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
-                serialPortList.at(ui->treeView->currentIndex().row())->textEdit->show();
+                if(ui->radioButton->isChecked())
+                {
+                    serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
+                    serialPortList.at(ui->treeView->currentIndex().row())->textEdit->show();
+                }
+                else {
+                    serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
+                    serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+                }
                 serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(ui->groupBox_read);
                 serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->show();
             }
@@ -1050,8 +1095,15 @@ void MainWindow::open_or_close()
                 ui->comboBox_TCPclients->addItem("全部客户端");
                 ui->pushButton_open_close->setText("停止监听");
                 ui->label_Device_State->setText("就绪");
-                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(ui->groupBox_send);
-                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->show();
+                if(ui->radioButton->isChecked())
+                {
+                    tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(ui->groupBox_send);
+                    tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->show();
+                }
+                else {
+                    tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setParent(ui->groupBox_send);
+                    tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->show();
+                }
                 tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->setParent(ui->groupBox_read);
                 tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->show();
             }
@@ -1339,7 +1391,9 @@ void MainWindow::createTcpServer(int port)
     tcpServerManagementList.append(newtcpServerManagement);
     ui->label_set_writeip->setText(newtcpServerManagement->getIP());
     ui->label_set_writeport->setText(QString::number(port));
-
+    DeviceNum++;
+    QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+    ui->label_DeviceNum->setText(str);
 }
 
 //创建TCP客户端
@@ -1355,6 +1409,9 @@ void MainWindow::createTcpClient(QString Hostip, int Hostport)
     connect(newTcpClient,&tcpClient::sendMsgSIGNAL,this,&MainWindow::upDateDeviceInfo);
     tcpClientList.append(newTcpClient);
     ui->label_set_writeip->setText(newTcpClient->getMyIP());
+    DeviceNum++;
+    QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+    ui->label_DeviceNum->setText(str);
 }
 
 //创建UDP服务器
@@ -1369,6 +1426,9 @@ void MainWindow::createUdpServer(int port)
     udpServer *newUdpServer=new udpServer(port,udpServerList.length());
     udpServerList.append(newUdpServer);
     connect(newUdpServer,&udpServer::ricvBitSIGNAL,this,&MainWindow::upDateDeviceInfo);
+    DeviceNum++;
+    QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+    ui->label_DeviceNum->setText(str);
 }
 
 //创建UDP客户端
@@ -1382,6 +1442,9 @@ void MainWindow::createUdpClient(QString serverIp, int serverPort)
     udpClient *newUdpClient=new udpClient(serverIp,serverPort,udpClientList.length());
     udpClientList.append(newUdpClient);
     connect(newUdpClient,&udpClient::ricvBitSIGNAL,this,&MainWindow::upDateDeviceInfo);
+    DeviceNum++;
+    QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
+    ui->label_DeviceNum->setText(str);
 }
 
 //关于帮助
@@ -1593,23 +1656,38 @@ void MainWindow::clearDataSLOT()
 {
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
     {
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->clearData();
+        if(tcpServerManagementList.at(ui->treeView->currentIndex().row())->isListening())
+        {
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->clearData();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="TCP客户端")
     {
-        tcpClientList.at(ui->treeView->currentIndex().row())->clearData();
+        if(tcpClientList.at(ui->treeView->currentIndex().row())->isConnection)
+        {
+            tcpClientList.at(ui->treeView->currentIndex().row())->clearData();
+        }
     }
     else if(ui->treeView->currentIndex().parent().data().toString()=="UDP服务端")
     {
-        udpServerList.at(ui->treeView->currentIndex().row())->clearData();
+        if(!udpServerList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+        {
+            udpServerList.at(ui->treeView->currentIndex().row())->clearData();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP客户端")
     {
-        udpClientList.at(ui->treeView->currentIndex().row())->clearData();
+        if(!udpClientList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+        {
+            udpClientList.at(ui->treeView->currentIndex().row())->clearData();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="串口(自动检测，无需创建)")
     {
-        serialPortList.at(ui->treeView->currentIndex().row())->clearData();
+        if(serialPortList.at(ui->treeView->currentIndex().row())->getState())
+        {
+            serialPortList.at(ui->treeView->currentIndex().row())->clearData();
+        }
     }
 }
 
@@ -1647,23 +1725,28 @@ void MainWindow::clearSendSLOT()
         type=16;
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
     {
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->clearSend(type);
+        if(tcpServerManagementList.at(ui->treeView->currentIndex().row())->isListening())
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->clearSend(type);
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="TCP客户端")
     {
-        tcpClientList.at(ui->treeView->currentIndex().row())->clearSend(type);
+        if(tcpClientList.at(ui->treeView->currentIndex().row())->isConnection)
+            tcpClientList.at(ui->treeView->currentIndex().row())->clearSend(type);
     }
     else if(ui->treeView->currentIndex().parent().data().toString()=="UDP服务端")
     {
-        udpServerList.at(ui->treeView->currentIndex().row())->clearSend(type);
+        if(!udpServerList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+            udpServerList.at(ui->treeView->currentIndex().row())->clearSend(type);
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP客户端")
     {
-        udpClientList.at(ui->treeView->currentIndex().row())->clearSend(type);
+        if(!udpClientList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+            udpClientList.at(ui->treeView->currentIndex().row())->clearSend(type);
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="串口(自动检测，无需创建)")
     {
-        serialPortList.at(ui->treeView->currentIndex().row())->clearSend(type);
+        if(serialPortList.at(ui->treeView->currentIndex().row())->getState())
+            serialPortList.at(ui->treeView->currentIndex().row())->clearSend(type);
     }
 }
 
@@ -1676,88 +1759,110 @@ void MainWindow::loadFileSLOT()
         type=16;
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
     {
-        if(ui->pushButton_loadFile->text()=="加载文件")
+        if(tcpServerManagementList.at(ui->treeView->currentIndex().row())->isListening())
         {
-            QString filePath = QFileDialog::getOpenFileName();
-            ui->pushButton_loadFile->setText("停止加载");
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->loadFile(filePath,type);
-        }
-        else {
-            ui->pushButton_loadFile->setText("加载文件");
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setEnabled(true);
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setEnabled(true);
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->isFile=false;
-            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->isFile=false;
+            if(ui->pushButton_loadFile->text()=="加载文件")
+            {
+                QString filePath = QFileDialog::getOpenFileName();
+                ui->pushButton_loadFile->setText("停止加载");
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->loadFile(filePath,type);
+            }
+            else {
+                ui->pushButton_loadFile->setText("加载文件");
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setEnabled(true);
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setEnabled(true);
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->isFile=false;
+                tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->isFile=false;
+            }
         }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="TCP客户端")
     {
-        if(ui->pushButton_loadFile->text()=="加载文件")
+        if(tcpClientList.at(ui->treeView->currentIndex().row())->isConnection)
         {
-            QString filePath = QFileDialog::getOpenFileName();
-            ui->pushButton_loadFile->setText("停止加载");
-            tcpClientList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
-        }
-        else
-        {
-            ui->pushButton_loadFile->setText("加载文件");
-            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
-            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
-            tcpClientList.at(ui->treeView->currentIndex().row())->isFile=false;
-            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            if(ui->pushButton_loadFile->text()=="加载文件")
+            {
+                QString filePath = QFileDialog::getOpenFileName();
+                ui->pushButton_loadFile->setText("停止加载");
+                tcpClientList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
+            }
+            else
+            {
+                ui->pushButton_loadFile->setText("加载文件");
+                tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
+                tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
+                tcpClientList.at(ui->treeView->currentIndex().row())->isFile=false;
+                tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            }
         }
     }
     else if(ui->treeView->currentIndex().parent().data().toString()=="UDP服务端")
     {
-        if(ui->pushButton_loadFile->text()=="加载文件")
+        if(!udpServerList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
         {
-            QString filePath = QFileDialog::getOpenFileName();
-            ui->pushButton_loadFile->setText("停止加载");
-            udpServerList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
-        }
-        else
-        {
-            ui->pushButton_loadFile->setText("加载文件");
-            udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
-            udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
-            udpServerList.at(ui->treeView->currentIndex().row())->isFile=false;
-            udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            if(ui->pushButton_loadFile->text()=="加载文件")
+            {
+                QString filePath = QFileDialog::getOpenFileName();
+                ui->pushButton_loadFile->setText("停止加载");
+                udpServerList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
+            }
+            else
+            {
+                ui->pushButton_loadFile->setText("加载文件");
+                udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
+                udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
+                udpServerList.at(ui->treeView->currentIndex().row())->isFile=false;
+                udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            }
         }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP客户端")
     {
-        if(ui->pushButton_loadFile->text()=="加载文件")
+        if(!udpClientList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
         {
-            QString filePath = QFileDialog::getOpenFileName();
-            ui->pushButton_loadFile->setText("停止加载");
-            udpClientList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
-        }
-        else
-        {
-            ui->pushButton_loadFile->setText("加载文件");
-            udpClientList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
-            udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
-            udpClientList.at(ui->treeView->currentIndex().row())->isFile=false;
-            udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            if(ui->pushButton_loadFile->text()=="加载文件")
+            {
+                QString filePath = QFileDialog::getOpenFileName();
+                ui->pushButton_loadFile->setText("停止加载");
+                udpClientList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
+            }
+            else
+            {
+                ui->pushButton_loadFile->setText("加载文件");
+                udpClientList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
+                udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
+                udpClientList.at(ui->treeView->currentIndex().row())->isFile=false;
+                udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            }
         }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="串口(自动检测，无需创建)")
     {
-        if(ui->pushButton_loadFile->text()=="加载文件")
+        if(serialPortList.at(ui->treeView->currentIndex().row())->getState())
         {
-            QString filePath = QFileDialog::getOpenFileName();
-            ui->pushButton_loadFile->setText("停止加载");
-            serialPortList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
-        }
-        else
-        {
-            ui->pushButton_loadFile->setText("加载文件");
-            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
-            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
-            serialPortList.at(ui->treeView->currentIndex().row())->isFile=false;
-            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            if(ui->pushButton_loadFile->text()=="加载文件")
+            {
+                QString filePath = QFileDialog::getOpenFileName();
+                ui->pushButton_loadFile->setText("停止加载");
+                serialPortList.at(ui->treeView->currentIndex().row())->loadFile(filePath,type);
+            }
+            else
+            {
+                ui->pushButton_loadFile->setText("加载文件");
+                serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
+                serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setEnabled(true);
+                serialPortList.at(ui->treeView->currentIndex().row())->isFile=false;
+                serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->isFile=false;
+            }
         }
     }
+}
+
+void MainWindow::clickSetting()
+{
+    SettingDialog *a=new SettingDialog(this);
+    connect(a,&SettingDialog::sendDeviceNumSIGNAL,this,&MainWindow::setMaxDeviceNum);
+    a->show();
 }
 
 void MainWindow::AsciiEditSLOT()
