@@ -87,7 +87,7 @@ void common::changePosSLOT()
     QString str=this->toPlainText();
     if(str=="")
         return;
-    QString ch=str.at(str.length()-1);
+    char ch=str.at(str.length()-1).toLatin1();
     qDebug()<<"str="<<str<<"  ch="<<ch;
     if((ch>='A')&&(ch<='F'))
     {
