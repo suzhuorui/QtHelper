@@ -98,8 +98,11 @@ void common::changePosSLOT()
     }
     else {
         //ch错误";
-        str.remove(str.length()-1,1);
-        this->clear();
-        this->append(str);
+        if(!isFile)
+        {
+            str.remove(str.length()-1,1);
+            this->clear();
+            this->append(str);
+        }
     }
 }

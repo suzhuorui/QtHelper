@@ -15,6 +15,7 @@ public:
     static QString getCurrTime();
     static QByteArray hexStrToByteArray(const QString &str);
     static char convertHexChar(char ch);
+    bool isFile=false;
 
 protected:
     void keyPressEvent(QKeyEvent *event);
