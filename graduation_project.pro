@@ -40,7 +40,8 @@ SOURCES += \
         tcpserver.cpp \
         tcpservermanagement.cpp \
         udpclient.cpp \
-        udpserver.cpp
+        udpserver.cpp \
+        settingdialog.cpp
 
 HEADERS += \
         common.h \
@@ -57,7 +58,8 @@ HEADERS += \
         tcpserver.h \
         tcpservermanagement.h \
         udpclient.h \
-        udpserver.h
+        udpserver.h \
+        settingdialog.h
 
 FORMS += \
         createtcpclient.ui \
@@ -65,7 +67,8 @@ FORMS += \
         createudpclient.ui \
         createudpserver.ui \
         helpdialog.ui \
-        mainwindow.ui
+        mainwindow.ui \
+        settingdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
