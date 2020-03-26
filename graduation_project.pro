@@ -41,7 +41,8 @@ SOURCES += \
         tcpserver.cpp \
         tcpservermanagement.cpp \
         udpclient.cpp \
-        udpserver.cpp
+        udpserver.cpp \
+        settingdialog.cpp
 
 HEADERS += \
         common.h \
@@ -59,7 +60,8 @@ HEADERS += \
         tcpserver.h \
         tcpservermanagement.h \
         udpclient.h \
-        udpserver.h
+        udpserver.h \
+        settingdialog.h
 
 FORMS += \
         createtcpclient.ui \
