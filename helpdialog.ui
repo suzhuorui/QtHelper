@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
-    <height>455</height>
+    <width>717</width>
+    <height>498</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>310</x>
      <y>20</y>
      <width>101</width>
      <height>31</height>
@@ -35,8 +35,8 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>60</y>
-     <width>571</width>
+     <y>50</y>
+     <width>621</width>
      <height>71</height>
     </rect>
    </property>
@@ -50,8 +50,8 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>390</y>
+     <x>50</x>
+     <y>442</y>
      <width>111</width>
      <height>21</height>
     </rect>
@@ -63,8 +63,8 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>410</y>
+     <x>50</x>
+     <y>460</y>
      <width>121</width>
      <height>21</height>
     </rect>
@@ -76,8 +76,8 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>430</y>
+     <x>50</x>
+     <y>480</y>
      <width>161</width>
      <height>16</height>
     </rect>
@@ -90,9 +90,9 @@
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>150</y>
-     <width>511</width>
-     <height>241</height>
+     <y>130</y>
+     <width>561</width>
+     <height>301</height>
     </rect>
    </property>
    <property name="font">
@@ -111,7 +111,12 @@
 7.定时发送：选择一个设备，设置循环发送次数，设置循环时间间隔，在数据输入框中输入数据，点击定时发送。
 8.保存数据：选择一个设备，点击保存数据，选择文件路径和文件名，把数据接收框中的内容保存到文件中。
 9.清空接收框：选择一个设备，点击清空接收框，将清空数据接收框中的内容。
-10.计数清零：选择一个设备，点击计数清零，使下方的接收字节数与发送字节数重置清零。</string>
+10.计数清零：选择一个设备，点击计数清零，使下方的接收字节数与发送字节数重置清零。
+11.清空接收框：清空当前设备的数据接收框。
+12.清空发送框：清空当前设备的数据发送框。
+13.加载文件：选择一个数据源文件加载，使输入框不能更改，点击发送则发送文件内容。点击停止加载，使输入框可以更改。
+14.导出数据：设置一个文件路径，导出数据接收框中的数据。
+15.更改最大设备数：设置最大设备数，使可创建设备数量增大。</string>
    </property>
    <property name="wordWrap">
     <bool>true</bool>
@@ -121,7 +126,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>132</y>
+     <y>112</y>
      <width>54</width>
      <height>20</height>
     </rect>
