@@ -35,6 +35,7 @@ SOURCES += \
         mainwindow.cpp \
         myobject.cpp \
         serialport.cpp \
+        settingdialog.cpp \
         socketrun.cpp \
         tcpclient.cpp \
         tcpserver.cpp \
@@ -53,6 +54,7 @@ HEADERS += \
         mainwindow.h \
         myobject.h \
         serialport.h \
+        settingdialog.h \
         socketrun.h \
         tcpclient.h \
         tcpserver.h \
@@ -76,6 +78,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RC_ICONS = mFs.ico
+
 
 RESOURCES += \
     images.qrc

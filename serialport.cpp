@@ -6,6 +6,10 @@ SerialPort::SerialPort(QString name,int falgcount, QObject *parent) : QSerialPor
     this->name=name;
     m_serial=new QSerialPort(this);
     type=5;
+    this->strBaudRate=3;
+    this->strDataBits=3;
+    this->strParity=1;
+    this->strStopBits=0;
     connect(m_serial,SIGNAL(readyRead()),this,SLOT(ReadyreadSLOT()));
 }
 
@@ -39,6 +43,7 @@ void SerialPort::closeSerialPort()
 
 void SerialPort::sendMsg(QString msg,QString addr)
 {
+    qDebug()<<"8";
     QByteArray ba=msg.toLocal8Bit();
     int len=m_serial->write(ba);
     if(len>0)
@@ -69,14 +74,19 @@ void SerialPort::sendHexMsg(QString msg,QString addr)
 
 void SerialPort::timerSend(QString msg, float s, int count, int sendType, QString add)
 {
+    qDebug()<<"5";
+    m_timer=new QTimer();
     this->timerCount=count;
     this->msg=msg;
     this->sendType=sendType;
     int ms=s*1000;
+    qDebug()<<"5.2";
     m_timer->setInterval(ms);
+    qDebug()<<"5.3";
     connect(m_timer,SIGNAL(timeout()),this,SLOT(timerSendSLOT()));
     isTimeSending=true;
     m_timer->start();
+    qDebug()<<"5.7";
 }
 
 //Index   Index    Index   Index
@@ -194,10 +204,12 @@ void SerialPort::ReadyreadSLOT()
 
 void SerialPort::timerSendSLOT()
 {
+    qDebug()<<"6";
     if(sendType==10)
     {
         if(nowCount<timerCount)
         {
+            qDebug()<<"7";
             nowCount++;
             sendMsg(msg);
         }

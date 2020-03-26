@@ -22,8 +22,11 @@ int DeviceNum=0;
 */
 //点击监听后根据选择模式显示输入框TCP服务器--解决
 //TCP服务器加载文件，发送按钮名字改变--解决
-//检测加载文件、导出文件、清空数据框前是否存在
-//添加功能，限制最大连接数，更改最大连接数。选择无限制连接或者输入最大连接数。
+//检测加载文件、导出文件、清空数据框前是否存在--解决
+//添加功能，限制最大连接数，更改最大连接数。选择无限制连接或者输入最大连接数--解决。
+//更新关于帮助界面的信息。添加新功能。--解决
+//串口发送-一个设备Hex换另一个设备，没有隐藏。再次换ASCII直接ASCII覆盖到Hex。--解决
+//串口--定时发送，软件崩溃--解决。
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -106,18 +109,22 @@ void MainWindow::InitSoft()
     ui->comboBox_botelv->addItem("38400");
     ui->comboBox_botelv->addItem("57600");
     ui->comboBox_botelv->addItem("115200");
+
     ui->comboBox_jiou->addItem("None(无)");
     ui->comboBox_jiou->addItem("Even(奇)");
     ui->comboBox_jiou->addItem("Odd(偶)");
     ui->comboBox_jiou->addItem("Space(=0)");
     ui->comboBox_jiou->addItem("Mark(=1)");
+
     ui->comboBox_dateBit->addItem("5");
     ui->comboBox_dateBit->addItem("6");
     ui->comboBox_dateBit->addItem("7");
     ui->comboBox_dateBit->addItem("8");
+
     ui->comboBox_stopBit->addItem("1");
     ui->comboBox_stopBit->addItem("1.5");
     ui->comboBox_stopBit->addItem("2");
+
 
     QString str=QString::number(DeviceNum)+"/"+QString::number(MaxDeviceNum);
     ui->label_DeviceNum->setText(str);
@@ -778,6 +785,8 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         foreach(tcpClient *cli,tcpClientList){
             cli->textEdit->setParent(nullptr);
             cli->textBrowser->setParent(nullptr);
+            cli->hexEdit->setParent(nullptr);
+            cli->hexEdit->hide();
             cli->textEdit->hide();
             cli->textBrowser->hide();
         }
@@ -787,6 +796,8 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
             {
                 serM->server->textEdit->setParent(nullptr);
                 serM->server->textBrowser->setParent(nullptr);
+                serM->server->hexEdit->setParent(nullptr);
+                serM->server->hexEdit->hide();
                 serM->server->textEdit->hide();
                 serM->server->textBrowser->hide();
             }
@@ -795,6 +806,8 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         foreach(udpServer *serM,udpServerList){
                 serM->textEdit->setParent(nullptr);
                 serM->textBrowser->setParent(nullptr);
+                serM->hexEdit->setParent(nullptr);
+                serM->hexEdit->hide();
                 serM->textEdit->hide();
                 serM->textBrowser->hide();
         }
@@ -802,16 +815,20 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         foreach(udpClient *cli,udpClientList){
             cli->textEdit->setParent(nullptr);
             cli->textBrowser->setParent(nullptr);
+            cli->hexEdit->setParent(nullptr);
+            cli->hexEdit->hide();
             cli->textEdit->hide();
             cli->textBrowser->hide();
         }
-        //隐藏别人
+        //隐藏串口
         int i=-1;
         foreach(SerialPort *port,serialPortList){
             if(++i==index.row())
                 continue;
             port->textEdit->setParent(nullptr);
             port->textBrowser->setParent(nullptr);
+            port->hexEdit->setParent(nullptr);
+            port->hexEdit->hide();
             port->textEdit->hide();
             port->textBrowser->hide();
         }
@@ -1221,11 +1238,13 @@ void MainWindow::sendDate()
 //定时发送,在点击后更改按钮信息，在每个类中增加定时发送状态，正在发送或没有发送
 void MainWindow::timerSendDate()
 {
-    if(ui->lineEdit_time->text().toInt()<0&&ui->lineEdit_time->text().toInt()>9999999)
+    qDebug()<<"1";
+    if(ui->lineEdit_time->text().toFloat()<0&&ui->lineEdit_time->text().toFloat()>99999)
     {
         QMessageBox::warning(nullptr,"Error","时间间隔超出范围。\n0<time(ms)<999999");
         return;
     }
+    qDebug()<<"2";
     int currIndex=ui->treeView->currentIndex().row();
     //通过判断当前所选中item的parent来更改相应的标签
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
@@ -1348,22 +1367,21 @@ void MainWindow::timerSendDate()
         {
             if(!serialPortList.at(currIndex)->isTimerSending())
             {
+                qDebug()<<"3";
                 ui->toolButton_timerStartstop->setText("停止发送");
-                if(serialPortList.at(currIndex)->getState())
+                if(ui->radioButton->isChecked())
                 {
-                    if(ui->radioButton->isChecked())
-                    {
-                        QString msg=serialPortList.at(currIndex)->textEdit->toPlainText();
-                        float s=ui->lineEdit_time->text().toFloat();
-                        int count=ui->spinBox->value();
-                        serialPortList.at(currIndex)->timerSend(msg,s,count,10);
-                    }
-                    else {
-                        QString msg=serialPortList.at(currIndex)->hexEdit->toPlainText();
-                        float s=ui->lineEdit_time->text().toFloat();
-                        int count=ui->spinBox->value();
-                        serialPortList.at(currIndex)->timerSend(msg,s,count,16);
-                    }
+                    qDebug()<<"4";
+                    QString msg=serialPortList.at(currIndex)->textEdit->toPlainText();
+                    float s=ui->lineEdit_time->text().toFloat();
+                    int count=ui->spinBox->value();
+                    serialPortList.at(currIndex)->timerSend(msg,s,count,10);
+                }
+                else {
+                    QString msg=serialPortList.at(currIndex)->hexEdit->toPlainText();
+                    float s=ui->lineEdit_time->text().toFloat();
+                    int count=ui->spinBox->value();
+                    serialPortList.at(currIndex)->timerSend(msg,s,count,16);
                 }
             }
             else {

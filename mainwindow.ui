@@ -236,7 +236,7 @@
      </font>
     </property>
     <property name="title">
-     <string>当前设置</string>
+     <string>当前设备信息：</string>
     </property>
     <widget class="QLabel" name="label">
      <property name="geometry">
@@ -558,10 +558,10 @@
     <widget class="QLabel" name="label_set_jiou">
      <property name="geometry">
       <rect>
-       <x>450</x>
+       <x>440</x>
        <y>20</y>
-       <width>54</width>
-       <height>16</height>
+       <width>71</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="font">
@@ -577,10 +577,10 @@
     <widget class="QLabel" name="label_set_dateBit">
      <property name="geometry">
       <rect>
-       <x>423</x>
+       <x>450</x>
        <y>60</y>
-       <width>91</width>
-       <height>20</height>
+       <width>54</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="font">
