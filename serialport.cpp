@@ -43,19 +43,15 @@ void SerialPort::closeSerialPort()
 
 void SerialPort::sendMsg(QString msg,QString addr)
 {
-    qDebug()<<"8";
     QByteArray ba=msg.toLocal8Bit();
     int len=m_serial->write(ba);
     if(len>0)
     {
-        qDebug()<<"进入发送"<<getState();
         sendBit+=len;
-        QString str="["+common::getCurrTime()+"]发送[ASCII]："+msg;
-        qDebug()<<"进入发送"<<getState();
-        textBrowser->append(str);
-        qDebug()<<"进入发送"<<getState();
+        QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[ASCII]:")+getRedString(msg);
+        //QString str="["+common::getCurrTime()+"]发送[ASCII]："+msg;
+        textBrowser->append(str1);
         emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
-        qDebug()<<"进入发送"<<getState();
     }
 }
 
@@ -66,8 +62,9 @@ void SerialPort::sendHexMsg(QString msg,QString addr)
     if(len>0)
     {
         sendBit+=len;
-        QString str="["+common::getCurrTime()+"]发送[Hex]："+msg;
-        textBrowser->append(str);
+        QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[Hex]:")+getRedString(msg);
+        //QString str="["+common::getCurrTime()+"]发送[Hex]："+msg;
+        textBrowser->append(str1);
         emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
     }
 }
@@ -195,7 +192,8 @@ void SerialPort::ReadyreadSLOT()
     {
         QString str=QString::fromLocal8Bit(ba);
         QString strHex=ba.toHex().toStdString().c_str();
-        QString str1="["+common::getCurrTime()+"]收到:["+strHex.toUpper()+"]"+str;
+        QString str1=getBlueString("["+common::getCurrTime()+"]")+otherIP+getGreenString("："+strHex.toUpper()+"]")+getRedString(str);
+        //QString str1="["+common::getCurrTime()+"]收到:["+strHex.toUpper()+"]"+str;
         textBrowser->append(str1);
         ricvBit+=ba.size();
         emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);

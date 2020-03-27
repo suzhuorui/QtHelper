@@ -87,10 +87,7 @@ void tcpServer::sendMsg(QString str, QString addr)
     {
         foreach(socketRun *sock,socketList){
             sock->write(data);
-            qDebug()<<"fuSend:"<<str;
         }
-        QString str1="["+common::getCurrTime()+"]发送[ASCII]："+str;
-        textBrowser->append(str1);
     }
     else {
         int n=-1;
@@ -100,13 +97,13 @@ void tcpServer::sendMsg(QString str, QString addr)
             n++;
             if(address==addr)
             {
-                QString str1="["+common::getCurrTime()+"]发送[ASCII]："+str;
                 socketList.at(n)->write(data);
-                textBrowser->append(str1);
                 break;
             }
         }
     }
+    QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[ASCII]:")+getRedString(str);
+    textBrowser->append(str1);
     emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
 }
 
@@ -138,7 +135,6 @@ void tcpServer::sendHexMsg(QString msg, QString addr)
         qDebug()<<"服务器->全部客户端("<<socketList.length()<<"个)";
         foreach(socketRun *sock,socketList){
             sock->write(data);
-            qDebug()<<"fuSend:"<<msg;
         }
     }
     else {
@@ -154,7 +150,8 @@ void tcpServer::sendHexMsg(QString msg, QString addr)
             }
         }
     }
-    QString str1="["+common::getCurrTime()+"]发送[Hex]:"+msg;
+    QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[Hex]:")+getRedString(msg);
+    //QString str1="["+common::getCurrTime()+"]发送[Hex]:"+msg;
     textBrowser->append(str1);
     emit sendDateSIGNAL(sendBit,ricvBit,falgcount,type);
 }
@@ -194,7 +191,8 @@ void tcpServer::readslot(QByteArray ba,int size,QString ip)
     qDebug()<<"asdasd";
     QString str=QString::fromLocal8Bit(ba);
     QString strHex=ba.toHex().toStdString().c_str();
-    QString str1="["+common::getCurrTime()+"]"+ip+":["+strHex.toUpper()+"]"+str;
+    //QString str1="["+common::getCurrTime()+"]"+ip+":["+strHex.toUpper()+"]"+str;
+    QString str1=getBlueString("["+common::getCurrTime()+"]")+ip+getGreenString("：["+strHex.toUpper()+"]")+getRedString(str);
     textBrowser->append(str1);
     ricvBit+=size;
 }

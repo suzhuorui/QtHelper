@@ -68,7 +68,8 @@ void tcpClient::sendMsg(QString str, QString addr)
     if(size>=0)
     {
         sendBit+=size;
-        QString str1="["+common::getCurrTime()+"]发送[ASCII]："+str;
+        //QString str1="[<font color=\"blue\">" + common::getCurrTime() + "</font>"+"]发送[ASCII]："+str;
+        QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[ASCII]:")+getRedString(str);
         textBrowser->append(str1);
     }
     emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
@@ -102,7 +103,8 @@ void tcpClient::sendHexMsg(QString msg,QString addr)
     if(size>=0)
     {
         sendBit+=size;
-        QString str1="["+common::getCurrTime()+"]发送[Hex]："+msg;
+        //QString str1="["+common::getCurrTime()+"]发送[Hex]："+msg;
+        QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[Hex]:")+getRedString(msg);
         textBrowser->append(str1);
     }
     emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
@@ -130,7 +132,8 @@ void tcpClient::ricvMsgSLOT()
     int size=ba.size();
     qDebug()<<"客户端ricv:"<<size;
     ricvBit+=size;
-    QString str1="["+common::getCurrTime()+"]"+otherIP+":["+strHex.toUpper()+"]"+str;
+    QString str1=getBlueString("["+common::getCurrTime()+"]")+otherIP+getGreenString("：["+strHex.toUpper()+"]")+getRedString(str);
+    //QString str1="["+common::getCurrTime()+"]"+otherIP+":["+strHex.toUpper()+"]"+str;
     textBrowser->append(str1);
     emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
 }

@@ -108,6 +108,21 @@ void MyObject::loadFile(QString path,int type)
     }
 }
 
+QString MyObject::getRedString(QString str)
+{
+    return "<font color=\"red\">" + str + "</font>";
+}
+
+QString MyObject::getBlueString(QString str)
+{
+    return "<font color=\"blue\">" + str + "</font>";
+}
+
+QString MyObject::getGreenString(QString str)
+{
+    return "<font color=\"green\">" + str + "</font>";
+}
+
 void MyObject::findMyIP()
 {
     QString ipaddress;

@@ -37,8 +37,9 @@ void udpServer::sendMsg(QString msg,QString addr)
 
     int len=m_socket->writeDatagram(data,QHostAddress(otherIP),quint16(otherPort));
     sendBit+=len;
-    QString str="["+common::getCurrTime()+"]发送[ASCII]："+msg;
-    textBrowser->append(str);
+    QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[ASCII]:")+getRedString(msg);
+    //QString str="["+common::getCurrTime()+"]发送[ASCII]："+msg;
+    textBrowser->append(str1);
     emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
 
 }
@@ -69,8 +70,9 @@ void udpServer::sendHexMsg(QString msg, QString addr)
 
     int len=m_socket->writeDatagram(data,QHostAddress(otherIP),quint16(otherPort));
     sendBit+=len;
-    QString str="["+common::getCurrTime()+"]发送[Hex]："+msg;
-    textBrowser->append(str);
+    QString str1=getBlueString("["+common::getCurrTime()+"]")+"发送"+getGreenString("[Hex]:")+getRedString(msg);
+    //QString str="["+common::getCurrTime()+"]发送[Hex]："+msg;
+    textBrowser->append(str1);
     emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);
 }
 
@@ -87,7 +89,8 @@ void udpServer::ReadyreadSLOT()
         otherPort=int(p);
         QString str=QString::fromLocal8Bit(ba);
         QString strHex=ba.toHex().toStdString().c_str();
-        QString str1="["+common::getCurrTime()+"]收到:["+strHex.toUpper()+"]"+str;
+        QString str1=getBlueString("["+common::getCurrTime()+"]")+"收到"+getGreenString("：["+strHex.toUpper()+"]")+getRedString(str);
+        //QString str1="["+common::getCurrTime()+"]收到:["+strHex.toUpper()+"]"+str;
         textBrowser->append(str1);
         ricvBit+=len;
         emit ricvBitSIGNAL(sendBit,ricvBit,falgcount,type);

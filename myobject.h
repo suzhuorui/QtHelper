@@ -37,6 +37,9 @@ public:
     bool isTimerSending();
     void clearSend(int type);
     void loadFile(QString path, int type);
+    QString getRedString(QString str);
+    QString getBlueString(QString str);
+    QString getGreenString(QString str);
 
 private:
     void findMyIP();
