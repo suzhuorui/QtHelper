@@ -8,6 +8,7 @@ CreateTcpServer2::CreateTcpServer2(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("创建TCP服务器");
     connect(ui->pushButton_create,&QPushButton::clicked,this,&CreateTcpServer2::createDevice);
+    ui->lineEdit_lisenPort->setFocus();
 }
 
 CreateTcpServer2::~CreateTcpServer2()

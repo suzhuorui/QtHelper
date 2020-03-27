@@ -9,6 +9,7 @@ createTcpClient::createTcpClient(QWidget *parent) :
     this->setWindowTitle("创建TCP客户端");
     ui->lineEdit_ip->setCursorPosition(0);
     connect(ui->pushButton_create,&QPushButton::clicked,this,&createTcpClient::createDevice);
+    ui->lineEdit_ip->setFocus();
 }
 
 createTcpClient::~createTcpClient()

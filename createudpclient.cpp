@@ -9,6 +9,7 @@ createUdpClient::createUdpClient(QWidget *parent) :
     this->setWindowTitle("创建UDP客户端");
     ui->lineEdit_serverIP->setCursorPosition(0);
     connect(ui->pushButton_create,&QPushButton::clicked,this,&createUdpClient::createDevice);
+    ui->lineEdit_serverIP->setFocus();
 }
 
 createUdpClient::~createUdpClient()

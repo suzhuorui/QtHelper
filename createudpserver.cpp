@@ -8,6 +8,7 @@ createUdpServer::createUdpServer(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("创建UDP服务器");
     connect(ui->pushButton_create,&QPushButton::clicked,this,&createUdpServer::createDevice);
+    ui->lineEdit_port->setFocus();
 }
 
 createUdpServer::~createUdpServer()

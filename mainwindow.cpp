@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QBrush>
 #include <QGraphicsOpacityEffect>
-#include "settingdialog.h"
+
 int DeviceNum=0;
 /*时间：2020.3.12
  * 基本功能：
@@ -1878,7 +1878,7 @@ void MainWindow::loadFileSLOT()
 
 void MainWindow::clickSetting()
 {
-    SettingDialog *a=new SettingDialog();
+    SettingDialog *a=new SettingDialog(this);
     connect(a,&SettingDialog::sendDeviceNumSIGNAL,this,&MainWindow::setMaxDeviceNum);
     a->show();
 }
