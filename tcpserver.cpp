@@ -271,7 +271,6 @@ void tcpServer::timerSend(QString msg, float s, int count, int sendType, QString
 
 void tcpServer::timerSendSLOT()
 {
-    qDebug()<<"时间到了";
     if(sendType==10)
     {
         if(nowCount<timerCount)

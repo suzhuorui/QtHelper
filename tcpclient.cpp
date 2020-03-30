@@ -133,7 +133,7 @@ void tcpClient::ricvMsgSLOT()
     qDebug()<<"客户端ricv:"<<size;
     ricvBit+=size;
     QString str1=getBlueString("["+common::getCurrTime()+"]")+otherIP+getGreenString("：["+strHex.toUpper()+"]")+getRedString(str);
-    //QString str1="["+common::getCurrTime()+"]"+otherIP+":["+strHex.toUpper()+"]"+str;
+    //QString str2="["+common::getCurrTime()+"]"+otherIP+":["+strHex.toUpper()+"]"+str;
     textBrowser->append(str1);
     emit sendMsgSIGNAL(sendBit,ricvBit,falgcount,type);
 }

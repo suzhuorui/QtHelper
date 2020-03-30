@@ -27,6 +27,10 @@ int DeviceNum=0;
 //更新关于帮助界面的信息。添加新功能。--解决
 //串口发送-一个设备Hex换另一个设备，没有隐藏。再次换ASCII直接ASCII覆盖到Hex。--解决
 //串口--定时发送，软件崩溃--解决。
+//TCP服务器停止监听后再次打开监听后端口为0--解决
+//TCP服务器开始停止开始停止监听两次后从其他标签跳转时崩溃。--解决
+//开始停止监听后客户端连不上--解决
+//设置UDP服务器在无客户端发消息时，设备为未就绪状态。
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -229,13 +233,6 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         {
             ui->label_Device_name->setText(currName);
             ui->comboBox_TCPclients->clear();
-            if(tcpServerManagementList.at(index.row())->server->isTimerSending())
-            {
-                ui->toolButton_timerStartstop->setText("停止发送");
-            }
-            else {
-                ui->toolButton_timerStartstop->setText("定时发送");
-            }
             //隐藏其他类型的输入输出框
             foreach(tcpClient *cli,tcpClientList){
                 cli->textEdit->setParent(nullptr);
@@ -339,6 +336,16 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
                 foreach(QString client,tcpServerManagementList.at(index.row())->server->getClientList()){
                     ui->comboBox_TCPclients->addItem(client);
                 }
+            }
+
+
+
+            if(tcpServerManagementList.at(index.row())->server->isTimerSending())
+            {
+                ui->toolButton_timerStartstop->setText("停止发送");
+            }
+            else {
+                ui->toolButton_timerStartstop->setText("定时发送");
             }
 
             ui->label_sendNum->setText(QString::number(tcpServerManagementList.at(index.row())->server->getSendBit())+" 字节");
@@ -542,7 +549,15 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         }
         udpServerList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(ui->groupBox_read);
         udpServerList.at(ui->treeView->currentIndex().row())->textBrowser->show();
-        ui->label_Device_State->setText("就绪");
+        if(udpServerList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+        {
+            ui->label_Device_State->setText("未就绪");
+        }
+        else
+        {
+            ui->label_Device_State->setText("就绪");
+        }
+
         ui->label_set_readip->setText("本机IP:");
         ui->label_set_writeip->setText(udpServerList.at(ui->treeView->currentIndex().row())->getMyIP());
         ui->label_set_readport->setText("本机端口:");
@@ -959,7 +974,7 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
     }
 }
 
-//创建子树
+//创建子树设备
 void MainWindow::createTreesun()
 {
     if(DeviceNum>=MaxDeviceNum)
@@ -1401,7 +1416,7 @@ void MainWindow::createTcpServer(int port)
     m_Tree->item(ui->treeView->currentIndex().row())->appendRow(newItem);//添加子节点
     ui->treeView->expand(ui->treeView->currentIndex());//打开当前节点
     tcpServerManagement *newtcpServerManagement=new tcpServerManagement(tcpServerManagementList.length());
-    newtcpServerManagement->server->setPort(port);
+    newtcpServerManagement->setPort(port);
     connect(newtcpServerManagement->server,&tcpServer::hasClient,this,&MainWindow::updateDisInfo);
     connect(newtcpServerManagement->server,&tcpServer::sendDateSIGNAL,this,&MainWindow::upDateDeviceInfo);
     connect(newtcpServerManagement->server,&tcpServer::sendDisSIGNAL,this,&MainWindow::updateDisInfo);

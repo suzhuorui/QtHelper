@@ -6,11 +6,10 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <QDialog>
-#include <QTimer>
 #include <QMessageBox>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
-#include "autoserialport.h"
+
 #include "serialport.h"
 #include "createtcpserver2.h"
 #include "createtcpclient.h"
@@ -21,7 +20,6 @@
 #include "tcpservermanagement.h"
 #include "udpserver.h"
 #include "udpclient.h"
-#include <QRadioButton>
 #include "helpdialog.h"
 #include "settingdialog.h"
 
@@ -44,22 +42,21 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QStandardItemModel *m_Tree;
-    QStandardItem *m_Tree_TCPClient;
+    QStandardItemModel *m_Tree;//TreeView的模型对象
+    QStandardItem *m_Tree_TCPClient;//TCP服务器的标签对象
     QStandardItem *m_Tree_TCPServer;
     QStandardItem *m_Tree_UDPClient;
     QStandardItem *m_Tree_UDPServer;
     QStandardItem *m_Tree_Serial;
-    autoSerialPort *autoS;
 
+    //设备名的标志位，如：TCP_Server_1
     int tcp_server_num=1;
     int tcp_client_num=1;
     int udp_server_num=1;
     int udp_client_num=1;
     int serial_num=1;
 
-    int lastTime_Tcp_server=-1;
-
+    //存放各种设备的链表
     QList<tcpServerManagement *> tcpServerManagementList;
     QList<tcpClient *> tcpClientList;
     QList<udpServer *> udpServerList;
@@ -69,8 +66,9 @@ private:
 
     int MaxDeviceNum=10;//最大连接数
 
+    //查找串口设备名
     QStringList findSerialPort();
-    void initSerialPort();
+    void initSerialPort();//创建串口设备
 
 
 public slots:

@@ -7,6 +7,19 @@ tcpServerManagement::tcpServerManagement(int falgcount,QObject *parent) : QObjec
 
     QString ipaddress;
     QList<QHostAddress> list=QNetworkInterface::allAddresses();
+    foreach(QHostAddress addre,list)
+    {
+        if(addre.protocol()==QAbstractSocket::IPv4Protocol)
+        {
+            if(addre.toString()=="127.0.0.1")
+                continue;
+            else {
+                ipaddress=addre.toString();
+                break;
+            }
+        }
+    }
+    ip=ipaddress;
 }
 
 bool tcpServerManagement::CreateAndlistenTcp()
@@ -16,6 +29,7 @@ bool tcpServerManagement::CreateAndlistenTcp()
     {
         server=new tcpServer(falgcount,this);
     }
+    server->setPort(port);
     bool is=server->listenTcp();
     if(is)
     {
@@ -47,12 +61,12 @@ void tcpServerManagement::setPort(int port)
 
 int tcpServerManagement::getPort()
 {
-    return server->getMyPort();
+    return port;
 }
 
 QString tcpServerManagement::getIP()
 {
-    return server->getMyIP();
+    return ip;
 }
 
 bool tcpServerManagement::isListening()

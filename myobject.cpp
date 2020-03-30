@@ -110,7 +110,9 @@ void MyObject::loadFile(QString path,int type)
 
 QString MyObject::getRedString(QString str)
 {
-    return "<font color=\"red\">" + str + "</font>";
+    //"/r/n"不能再html文档中换行，需要使用html格式
+    QString s=str.replace("\r\n","<br/>");
+    return "<font color=\"red\">" + s + "</font>";
 }
 
 QString MyObject::getBlueString(QString str)
