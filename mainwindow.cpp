@@ -30,7 +30,10 @@ int DeviceNum=0;
 //TCP服务器停止监听后再次打开监听后端口为0--解决
 //TCP服务器开始停止开始停止监听两次后从其他标签跳转时崩溃。--解决
 //开始停止监听后客户端连不上--解决
-//设置UDP服务器在无客户端发消息时，设备为未就绪状态。
+//设置UDP服务器在无客户端发消息时，设备为未就绪状态。--解决
+//定时发送什么dou不选点击发送后应该设置不能发送。--解决（初始化时给值）
+//UDP服务器定时发送，崩溃--解决
+//设置UDP服务器刚创建时把数据发送框设置不能输入，接收数据时设置能发送--解决
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -153,6 +156,9 @@ void MainWindow::InitSoft()
     ui->comboBox_botelv->hide();
     ui->comboBox_dateBit->hide();
     ui->comboBox_stopBit->hide();
+
+    ui->spinBox->setValue(0);
+    ui->lineEdit_time->setText("0");
 
     connect(ui->treeView,&QTreeView::clicked,this,&MainWindow::changeDeviceInfo);
     connect(ui->pushButton_create,&QPushButton::clicked,this,&MainWindow::createTreesun);
@@ -552,10 +558,12 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         if(udpServerList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
         {
             ui->label_Device_State->setText("未就绪");
+            udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(false);
         }
         else
         {
             ui->label_Device_State->setText("就绪");
+            udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setEnabled(true);
         }
 
         ui->label_set_readip->setText("本机IP:");
@@ -985,21 +993,25 @@ void MainWindow::createTreesun()
     if(ui->treeView->currentIndex().data().toString()=="TCP服务器")
     {
         class CreateTcpServer2 *dialog=new class CreateTcpServer2();
+        dialog->setModal(true);
         dialog->show();
         connect(dialog,&CreateTcpServer2::createSignal,this,&MainWindow::createTcpServer);
     }
     else if (ui->treeView->currentIndex().data().toString()=="TCP客户端") {
         class createTcpClient *dialog=new class createTcpClient();
+        dialog->setModal(true);
         dialog->show();
         connect(dialog,&createTcpClient::createSignal,this,&MainWindow::createTcpClient);
     }
     else if (ui->treeView->currentIndex().data().toString()=="UDP服务端") {
         class createUdpServer *dialog=new class createUdpServer();
+        dialog->setModal(true);
         dialog->show();
         connect(dialog,&createUdpServer::createSignal,this,&MainWindow::createUdpServer);
     }
     else if (ui->treeView->currentIndex().data().toString()=="UDP客户端") {
         class createUdpClient *dialog=new class createUdpClient();
+        dialog->setModal(true);
         dialog->show();
         connect(dialog,&createUdpClient::createSignal,this,&MainWindow::createUdpClient);
     }
@@ -1325,8 +1337,10 @@ void MainWindow::timerSendDate()
         }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP服务端") {
-        if(!udpClientList.at(currIndex)->getOtherIP().isEmpty())
+        qDebug()<<"is ?";
+        if(!udpServerList.at(currIndex)->getOtherIP().isEmpty())
         {
+            qDebug()<<"other IP No empty";
             if(!udpServerList.at(currIndex)->isTimerSending())
             {
                 qDebug()<<"udpjinru";
@@ -1350,6 +1364,7 @@ void MainWindow::timerSendDate()
                 ui->toolButton_timerStartstop->setText("定时发送");
             }
         }
+        qDebug()<<"456546";
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP客户端") {
         if(!udpClientList.at(currIndex)->getOtherIP().isEmpty())
@@ -1649,6 +1664,8 @@ void MainWindow::updateDisInfo()
     }
 }
 
+
+//设置当前设备ASCII隐藏，Hex显示
 void MainWindow::HexEditSLOT()
 {
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
@@ -1749,6 +1766,7 @@ void MainWindow::saveDataSLOT()
     }
 }
 
+//清空数据发送框
 void MainWindow::clearSendSLOT()
 {
     int type=0;
@@ -1783,6 +1801,7 @@ void MainWindow::clearSendSLOT()
     }
 }
 
+//点击加载文件
 void MainWindow::loadFileSLOT()
 {
     int type=0;
@@ -1891,13 +1910,16 @@ void MainWindow::loadFileSLOT()
     }
 }
 
+//点击更改最大连接数槽函数
 void MainWindow::clickSetting()
 {
     SettingDialog *a=new SettingDialog(this);
     connect(a,&SettingDialog::sendDeviceNumSIGNAL,this,&MainWindow::setMaxDeviceNum);
+    a->setModal(true);
     a->show();
 }
 
+//设置当前所选中设备隐藏hex显示ASCII
 void MainWindow::AsciiEditSLOT()
 {
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
