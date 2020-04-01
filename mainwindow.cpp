@@ -19,6 +19,8 @@ int DeviceNum=0;
  *      11.重置计数
  *      12.导入文件数据源
  *      13.保存显示区数据到文件
+ *      14.显示目前设备数
+ *      15.更改最大连接数
 */
 //点击监听后根据选择模式显示输入框TCP服务器--解决
 //TCP服务器加载文件，发送按钮名字改变--解决
@@ -34,6 +36,8 @@ int DeviceNum=0;
 //定时发送什么dou不选点击发送后应该设置不能发送。--解决（初始化时给值）
 //UDP服务器定时发送，崩溃--解决
 //设置UDP服务器刚创建时把数据发送框设置不能输入，接收数据时设置能发送--解决
+//TCP服务器监听失败弹出两个错误框。--解决
+//设置创建设备对话框，端口号范围为1024-65535.--解决
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -1150,9 +1154,6 @@ void MainWindow::open_or_close()
                 }
                 tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->setParent(ui->groupBox_read);
                 tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->show();
-            }
-            else {
-                QMessageBox::warning(this,"错误","监听失败，请确保端口正确且没有被占用",nullptr,nullptr);
             }
         }
         else
