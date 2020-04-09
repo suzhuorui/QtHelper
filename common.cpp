@@ -88,12 +88,14 @@ void common::changePosSLOT()
     if(str=="")
         return;
     QString ch=str.at(str.length()-1);
+    QChar ch1=str.at(str.length()-1);
+    char ch2=ch1.toLatin1();
     qDebug()<<"str="<<str<<"  ch="<<ch;
-    if((ch>='A')&&(ch<='F'))
+    if((ch2>='A')&&(ch2<='F'))
     {
         //ch正常AF";
     }
-    else if ((ch>='0')&&(ch<='9')) {
+    else if ((ch2>='0')&&(ch2<='9')) {
         //正常09";
     }
     else {
