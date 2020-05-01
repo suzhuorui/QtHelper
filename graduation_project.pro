@@ -41,8 +41,8 @@ SOURCES += \
         tcpserver.cpp \
         tcpservermanagement.cpp \
         udpclient.cpp \
-        udpserver.cpp \
-        settingdialog.cpp
+        udpserver.cpp
+
 
 HEADERS += \
         common.h \
@@ -60,8 +60,7 @@ HEADERS += \
         tcpserver.h \
         tcpservermanagement.h \
         udpclient.h \
-        udpserver.h \
-        settingdialog.h
+        udpserver.h
 
 FORMS += \
         createtcpclient.ui \
@@ -77,7 +76,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-RC_ICONS = mFs.ico
+RC_ICONS = images/mFs.ico
 
 
 RESOURCES += \

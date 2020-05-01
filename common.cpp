@@ -26,9 +26,7 @@ QByteArray common::hexStrToByteArray(const QString &str)
             i++;
             continue;
         }
-
         i++;
-
         if (i >= len) {
             break;
         }

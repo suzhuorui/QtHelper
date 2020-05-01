@@ -625,6 +625,8 @@
     </property>
     <property name="font">
      <font>
+      <family>Arial</family>
+      <pointsize>12</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -644,6 +646,8 @@
     </property>
     <property name="font">
      <font>
+      <family>Arial</family>
+      <pointsize>12</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>

@@ -1,0 +1,6 @@
+问：说下TCP与UDP的区别                            答：TCP面向连接，安全  UDP无连接，不安全
+问：你这个软件对丢包有处理吗                      答：对丢包不做处理
+问：了解网管吗                                            答：不了解
+问：创建client与server的流程                        答：设置server端信息，server监听，等待client连接
+问：client与server的是通过什么输入输出的     答：io
+
