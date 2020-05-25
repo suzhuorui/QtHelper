@@ -39,6 +39,8 @@ int DeviceNum=0;
 //TCP服务器监听失败弹出两个错误框。--解决
 //设置创建设备对话框，端口号范围为1024-65535.--解决
 //多次重复断开TCP服务器监听后，服务器发送字节数不能直接改变，需要点击其他设备后再点击回来才能显示。
+//多tcp服务器切换时，选中为监听服务器时未能隐藏其他服务器输入输出框
+//从点击设备类型标签时和为就绪服务器时不能显示0字节改为点击后显示0字节
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -242,6 +244,26 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
 
         //设置不用监听均可设置的值
         {
+            //显示所选中的服务器的输入输出框，其他的都隐藏
+            //隐藏出自己以外的其他服务器的输入输出框
+            int i=-1;
+            foreach(tcpServerManagement *serM,tcpServerManagementList){
+                if(++i==index.row())
+                    continue;
+                else {
+                    if(serM->isHaveServer)
+                    {
+                        serM->server->textEdit->setParent(nullptr);
+                        serM->server->textBrowser->setParent(nullptr);
+                        serM->server->hexEdit->setParent(nullptr);
+                        serM->server->hexEdit->hide();
+                        serM->server->textEdit->hide();
+                        serM->server->textBrowser->hide();
+                    }
+                }
+            }
+
+
             ui->label_Device_name->setText(currName);
             ui->comboBox_TCPclients->clear();
             //隐藏其他类型的输入输出框
@@ -363,28 +385,14 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
             ui->label_ricvNum->setText(QString::number(tcpServerManagementList.at(index.row())->server->getRicvBit())+" 字节");
             tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->setParent(ui->groupBox_read);
             tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->show();
-            //显示所选中的服务器的输入输出框，其他的都隐藏
-            //隐藏其他服务器的输入输出框
-            int i=-1;
-            foreach(tcpServerManagement *serM,tcpServerManagementList){
-                if(++i==index.row())
-                    continue;
-                else {
-                    if(serM->isHaveServer)
-                    {
-                        serM->server->textEdit->setParent(nullptr);
-                        serM->server->textBrowser->setParent(nullptr);
-                        serM->server->hexEdit->setParent(nullptr);
-                        serM->server->hexEdit->hide();
-                        serM->server->textEdit->hide();
-                        serM->server->textBrowser->hide();
-                    }
-                }
-            }
+
         }
         else {
             ui->pushButton_open_close->setText("开始监听");
             ui->label_Device_State->setText("未就绪");
+            ui->label_sendNum->setText("0 字节");
+            ui->label_ricvNum->setText("0 字节");
+
             qDebug()<<"没有监听";
         }
     }
@@ -522,6 +530,8 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         else {
             ui->pushButton_open_close->setText("连接");
             ui->label_Device_State->setText("未就绪");
+            ui->label_sendNum->setText("0 字节");
+            ui->label_ricvNum->setText("0 字节");
         }
 
     }
@@ -918,6 +928,8 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         ui->label_Device_State->setText("未连接");
         ui->pushButton_open_close->setText("连接");
         ui->pushButton_loadFile->setText("加载文件");
+        ui->label_sendNum->setText("0 字节");
+        ui->label_ricvNum->setText("0 字节");
         foreach(SerialPort *port,serialPortList){
             port->textEdit->setParent(nullptr);
             port->textBrowser->setParent(nullptr);
@@ -1672,34 +1684,50 @@ void MainWindow::HexEditSLOT()
 {
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
     {
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->hide();
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(nullptr);
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setParent(ui->groupBox_send);
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->show();
+        if(tcpServerManagementList.at(ui->treeView->currentIndex().row())->isListening())
+        {
+            qDebug()<<"点击Hex  tcp监听了";
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->hide();
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(nullptr);
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setParent(ui->groupBox_send);
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="TCP客户端") {
-        tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->hide();
-        tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
-        tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
-        tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        if(tcpClientList.at(ui->treeView->currentIndex().row())->isConnection)
+        {
+            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->hide();
+            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
+            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
+            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP服务端") {
-        udpServerList.at(ui->treeView->currentIndex().row())->textEdit->hide();
-        udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
-        udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
-        udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        if(!udpServerList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+        {
+            udpServerList.at(ui->treeView->currentIndex().row())->textEdit->hide();
+            udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
+            udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
+            udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP客户端") {
-        udpClientList.at(ui->treeView->currentIndex().row())->textEdit->hide();
-        udpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
-        udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
-        udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        if(!udpClientList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+        {
+            udpClientList.at(ui->treeView->currentIndex().row())->textEdit->hide();
+            udpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
+            udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
+            udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="串口(自动检测，无需创建)") {
-        serialPortList.at(ui->treeView->currentIndex().row())->textEdit->hide();
-        serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
-        serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
-        serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        if(serialPortList.at(ui->treeView->currentIndex().row())->getState())
+        {
+            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->hide();
+            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
+            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
+            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+        }
     }
 }
 
@@ -1924,36 +1952,53 @@ void MainWindow::clickSetting()
 //设置当前所选中设备隐藏hex显示ASCII
 void MainWindow::AsciiEditSLOT()
 {
+
     if(ui->treeView->currentIndex().parent().data().toString()=="TCP服务器")
     {
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->hide();
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setParent(nullptr);
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(ui->groupBox_send);
-        tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->show();
+        if(tcpServerManagementList.at(ui->treeView->currentIndex().row())->isListening())
+        {
+            qDebug()<<"点击ASCII  tcp监听了";
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->hide();
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setParent(nullptr);
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(ui->groupBox_send);
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="TCP客户端") {
-        tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
-        tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
-        tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
-        tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        if(tcpClientList.at(ui->treeView->currentIndex().row())->isConnection)
+        {
+            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
+            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
+            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
+            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP服务端") {
-        udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
-        udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
-        udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
-        udpServerList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        if(!udpServerList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+        {
+            udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
+            udpServerList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
+            udpServerList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
+            udpServerList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="UDP客户端") {
-        udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
-        udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
-        udpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
-        udpClientList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        if(!udpClientList.at(ui->treeView->currentIndex().row())->getOtherIP().isEmpty())
+        {
+            udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
+            udpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
+            udpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
+            udpClientList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        }
     }
     else if (ui->treeView->currentIndex().parent().data().toString()=="串口(自动检测，无需创建)") {
-        serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
-        serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
-        serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
-        serialPortList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        if(serialPortList.at(ui->treeView->currentIndex().row())->getState())
+        {
+            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
+            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
+            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
+            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->show();
+        }
     }
 }
 
