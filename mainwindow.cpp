@@ -41,6 +41,7 @@ int DeviceNum=0;
 //多次重复断开TCP服务器监听后，服务器发送字节数不能直接改变，需要点击其他设备后再点击回来才能显示。
 //多tcp服务器切换时，选中为监听服务器时未能隐藏其他服务器输入输出框
 //从点击设备类型标签时和为就绪服务器时不能显示0字节改为点击后显示0字节
+//修改了串口设备为打开时输入框未隐藏的bug
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -789,35 +790,6 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
     else if (index.parent().data().toString()=="串口(自动检测，无需创建)") {
         qDebug()<<index.row();
 
-        if(serialPortList.at(index.row())->isFile)
-        {
-            ui->pushButton_loadFile->setText("停止加载");
-        }
-        else {
-            ui->pushButton_loadFile->setText("加载文件");
-        }
-
-        if(serialPortList.at(index.row())->isTimerSending())
-        {
-            ui->toolButton_timerStartstop->setText("停止发送");
-        }
-        else {
-            ui->toolButton_timerStartstop->setText("定时发送");
-        }
-
-        if(ui->radioButton->isChecked())
-        {
-            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
-            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
-            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
-            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->show();
-        }
-        else {
-            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->hide();
-            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
-            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
-            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->show();
-        }
 
         //隐藏tcp客户端
         foreach(tcpClient *cli,tcpClientList){
@@ -858,7 +830,7 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
             cli->textEdit->hide();
             cli->textBrowser->hide();
         }
-        //隐藏串口
+        //隐藏除自己以外的串口
         int i=-1;
         foreach(SerialPort *port,serialPortList){
             if(++i==index.row())
@@ -875,6 +847,36 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
         {
             ui->pushButton_open_close->setText("关闭串口");
             ui->label_Device_State->setText("就绪");
+
+            if(serialPortList.at(index.row())->isFile)
+            {
+                ui->pushButton_loadFile->setText("停止加载");
+            }
+            else {
+                ui->pushButton_loadFile->setText("加载文件");
+            }
+
+            if(serialPortList.at(index.row())->isTimerSending())
+            {
+                ui->toolButton_timerStartstop->setText("停止发送");
+            }
+            else {
+                ui->toolButton_timerStartstop->setText("定时发送");
+            }
+
+            if(ui->radioButton->isChecked())
+            {
+                serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
+                serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
+                serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(ui->groupBox_send);
+                serialPortList.at(ui->treeView->currentIndex().row())->textEdit->show();
+            }
+            else {
+                serialPortList.at(ui->treeView->currentIndex().row())->textEdit->hide();
+                serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
+                serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(ui->groupBox_send);
+                serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->show();
+            }
 
             //显示自己
             serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(ui->groupBox_read);
