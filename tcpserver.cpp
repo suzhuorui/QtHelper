@@ -123,8 +123,9 @@ void tcpServer::sendHexMsg(QString msg, QString addr)
             return;
         }
         QByteArray ba=file.readAll();
-        QString strHex=data.toHex().toStdString().c_str();
-        data=common::hexStrToByteArray(strHex.toUpper());
+        //QString strHex=ba.toHex().toStdString().c_str();
+        QString sss=ba.toStdString().c_str();
+        data=common::hexStrToByteArray(sss.toUpper());
     }
     else {
         data=common::hexStrToByteArray(msg);

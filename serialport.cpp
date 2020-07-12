@@ -43,8 +43,27 @@ void SerialPort::closeSerialPort()
 
 void SerialPort::sendMsg(QString msg,QString addr)
 {
-    QByteArray ba=msg.toLocal8Bit();
-    int len=m_serial->write(ba);
+     qDebug()<<"ASCII Send";
+    data.clear();
+    if(isFile)
+    {
+        QStringList strlist=textEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        qDebug()<<strlist.length()<<strlist2.at(0);
+
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
+        {
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
+        }
+        data=file.readAll();
+    }
+    else {
+        data=msg.toLocal8Bit();
+    }
+    //QByteArray ba=msg.toLocal8Bit();
+    int len=m_serial->write(data);
     if(len>0)
     {
         sendBit+=len;
@@ -57,8 +76,30 @@ void SerialPort::sendMsg(QString msg,QString addr)
 
 void SerialPort::sendHexMsg(QString msg,QString addr)
 {
-    QByteArray ba=common::hexStrToByteArray(msg);
-    int len=m_serial->write(ba);
+    qDebug()<<"HexSend";
+    data.clear();
+    if(isFile)
+    {
+        qDebug()<<"shi File";
+        QStringList strlist=hexEdit->toPlainText().split("[");
+        QStringList strlist2=strlist.at(1).split("]");
+        qDebug()<<strlist2.at(0);
+        QFile file(strlist2.at(0));
+        if(!file.open(QIODevice::ReadWrite))
+        {
+            QMessageBox::warning(nullptr,"ERROR","打开外部数据源文件失败！",nullptr,nullptr);
+            return;
+        }
+        QByteArray ba=file.readAll();
+        QString sss=ba.toStdString().c_str();
+        data=common::hexStrToByteArray(sss.toUpper());
+    }
+    else {
+        data=common::hexStrToByteArray(msg);
+    }
+    //QByteArray ba=common::hexStrToByteArray(msg);
+    qDebug()<<"data="<<data.size();
+    int len=m_serial->write(data);
     if(len>0)
     {
         sendBit+=len;
@@ -192,7 +233,7 @@ void SerialPort::ReadyreadSLOT()
     {
         QString str=QString::fromLocal8Bit(ba);
         QString strHex=ba.toHex().toStdString().c_str();
-        QString str1=getBlueString("["+common::getCurrTime()+"]")+otherIP+getGreenString("："+strHex.toUpper()+"]")+getRedString(str);
+        QString str1=getBlueString("["+common::getCurrTime()+"]")+"接收"+getGreenString("：["+strHex.toUpper()+"]")+getRedString(str);
         //QString str1="["+common::getCurrTime()+"]收到:["+strHex.toUpper()+"]"+str;
         textBrowser->append(str1);
         ricvBit+=ba.size();

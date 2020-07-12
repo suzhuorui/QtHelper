@@ -91,8 +91,12 @@ void tcpClient::sendHexMsg(QString msg,QString addr)
             return;
         }
         QByteArray ba=file.readAll();
-        QString strHex=data.toHex().toStdString().c_str();
-        data=common::hexStrToByteArray(strHex.toUpper());
+        //QString sss=QString::fromLatin1(ba);
+        QString sss=ba.toStdString().c_str();
+        qDebug()<<"sss="<<sss;
+        //QString strHex=ba.toHex().toStdString().c_str();
+        //qDebug()<<"strHex="<<strHex;
+        data=common::hexStrToByteArray(sss.toUpper());
     }
     else {
         data=common::hexStrToByteArray(msg);

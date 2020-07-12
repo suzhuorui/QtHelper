@@ -881,6 +881,9 @@ void MainWindow::changeDeviceInfo(const QModelIndex &index)
             //显示自己
             serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(ui->groupBox_read);
             serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->show();
+
+            ui->label_sendNum->setText(QString::number(serialPortList.at(ui->treeView->currentIndex().row())->getSendBit())+" 字节");
+            ui->label_ricvNum->setText(QString::number(serialPortList.at(ui->treeView->currentIndex().row())->getRicvBit())+" 字节");
         }
         else {
             ui->pushButton_open_close->setText("打开串口");
@@ -1091,8 +1094,19 @@ void MainWindow::open_or_close()
         if(tcpClientList.at(ui->treeView->currentIndex().row())->isConnection)
         {
             tcpClientList.at(ui->treeView->currentIndex().row())->disConnectToHost();
+
             ui->label_Device_State->setText("未就绪");
             ui->pushButton_open_close->setText("连接");
+            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
+            tcpClientList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(nullptr);
+            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
+            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->hide();
+            tcpClientList.at(ui->treeView->currentIndex().row())->textBrowser->hide();
+            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
+            tcpClientList.at(ui->treeView->currentIndex().row())->textEdit->clear();
+            tcpClientList.at(ui->treeView->currentIndex().row())->textBrowser->clear();
+            tcpClientList.at(ui->treeView->currentIndex().row())->hexEdit->clear();
+
         }
         else {
             if(tcpClientList.at(ui->treeView->currentIndex().row())->connectToHost())
@@ -1146,6 +1160,15 @@ void MainWindow::open_or_close()
             serialPortList.at(ui->treeView->currentIndex().row())->closeSerialPort();
             ui->pushButton_open_close->setText("打开串口");
             ui->label_Device_State->setText("未就绪");
+            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->setParent(nullptr);
+            serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->setParent(nullptr);
+            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->setParent(nullptr);
+            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->hide();
+            serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->hide();
+            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->hide();
+            serialPortList.at(ui->treeView->currentIndex().row())->textEdit->clear();
+            serialPortList.at(ui->treeView->currentIndex().row())->textBrowser->clear();
+            serialPortList.at(ui->treeView->currentIndex().row())->hexEdit->clear();
         }
 
     }
@@ -1174,6 +1197,15 @@ void MainWindow::open_or_close()
         else
         {
             qDebug()<<"点击停止监听";
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->setParent(nullptr);
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->setParent(nullptr);
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->setParent(nullptr);
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->hide();
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->hide();
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->hide();
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->hexEdit->clear();
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textEdit->clear();
+            tcpServerManagementList.at(ui->treeView->currentIndex().row())->server->textBrowser->clear();
             tcpServerManagementList.at(ui->treeView->currentIndex().row())->CloseAndDelListen();
             ui->comboBox_TCPclients->clear();
             ui->pushButton_open_close->setText("开始监听");
